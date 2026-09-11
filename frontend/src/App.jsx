@@ -3,10 +3,6 @@ import { generateSpeech } from "./api";
 import logoSvg from "./echoform-icon-site-theme.svg";
 import "./styles.css";
 
-/* ------------------------------------------------------------------ */
-/* Constants                                                           */
-/* ------------------------------------------------------------------ */
-
 const SCRIPT_IDEAS = [
   "Hello world. In the beginning there was silence — and then, there was voice.",
   "Welcome back. Today we explore how a few seconds of audio become an entire performance.",
@@ -28,10 +24,6 @@ const fmt = (s) => {
   return `${m}:${r.toString().padStart(2, "0")}`;
 };
 
-/* ------------------------------------------------------------------ */
-/* Hooks                                                               */
-/* ------------------------------------------------------------------ */
-
 function useObjectURL(file) {
   const [url, setUrl] = useState(null);
   useEffect(() => {
@@ -46,7 +38,6 @@ function useObjectURL(file) {
   return url;
 }
 
-/** Decode the audio file and extract bar peaks for the live waveform. */
 function useWaveform(file) {
   const [bars, setBars] = useState(null);
   const [duration, setDuration] = useState(0);
@@ -95,10 +86,6 @@ function useWaveform(file) {
   return { bars, duration, error };
 }
 
-/* ------------------------------------------------------------------ */
-/* Ambient canvas — layered audio waves drifting behind everything     */
-/* ------------------------------------------------------------------ */
-
 function AmbientCanvas() {
   const ref = useRef(null);
   useEffect(() => {
@@ -139,7 +126,6 @@ function AmbientCanvas() {
         ctx.strokeStyle = `rgba(${wv.rgb},${wv.a})`;
         ctx.lineWidth = 1.4 * dpr;
         ctx.stroke();
-        // soft fill under the first wave
         if (idx === 0) {
           ctx.lineTo(w, h);
           ctx.lineTo(0, h);
@@ -169,10 +155,6 @@ function AmbientCanvas() {
   return <canvas ref={ref} className="ambient" aria-hidden="true" />;
 }
 
-/* ------------------------------------------------------------------ */
-/* Small bits                                                          */
-/* ------------------------------------------------------------------ */
-
 const CheckIcon = () => (
   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
     <polyline points="20 6 9 17 4 12" />
@@ -199,10 +181,6 @@ const MicIcon = () => (
     <line x1="12" y1="19" x2="12" y2="23" />
   </svg>
 );
-
-/* ------------------------------------------------------------------ */
-/* Dropzone with live decoded waveform                                 */
-/* ------------------------------------------------------------------ */
 
 function Dropzone({ file, setFile, bars, duration, error, url }) {
   const [drag, setDrag] = useState(false);
@@ -318,10 +296,6 @@ function Dropzone({ file, setFile, bars, duration, error, url }) {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* Text field with counter + idea chips                                */
-/* ------------------------------------------------------------------ */
-
 function Field({ label, value, onChange, placeholder, ideas, minRows, hint }) {
   const count = value.trim().length;
   return (
@@ -350,10 +324,6 @@ function Field({ label, value, onChange, placeholder, ideas, minRows, hint }) {
     </div>
   );
 }
-
-/* ------------------------------------------------------------------ */
-/* Custom audio player for the result                                  */
-/* ------------------------------------------------------------------ */
 
 function Player({ src }) {
   const audioRef = useRef(null);
@@ -423,15 +393,11 @@ function Player({ src }) {
   );
 }
 
-/* ------------------------------------------------------------------ */
-/* App                                                                 */
-/* ------------------------------------------------------------------ */
-
 export default function App() {
   const [file, setFile] = useState(null);
   const [refText, setRefText] = useState("");
   const [genText, setGenText] = useState("");
-  const [phase, setPhase] = useState("idle"); // idle | generating | done
+  const [phase, setPhase] = useState("idle");
   const [statusLine, setStatusLine] = useState(0);
   const [result, setResult] = useState(null);
   const [toast, setToast] = useState("");

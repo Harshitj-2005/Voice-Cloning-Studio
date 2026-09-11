@@ -19,7 +19,7 @@ fs.mkdirSync(uploadDir, { recursive: true });
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  limits: { fileSize: 25 * 1024 * 1024 }, // 25MB
+  limits: { fileSize: 25 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (!file.mimetype.startsWith("audio/")) {
       return cb(new Error("Only audio files are allowed"));
@@ -30,14 +30,12 @@ const upload = multer({
 
 app.get("/api/health", (req, res) => res.json({ ok: true }));
 
-// Proxy to Python AI service: multipart { refAudio, refText, genText }
 app.post("/api/tts", upload.single("refAudio"), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: "refAudio file required" });
     const { refText, genText } = req.body;
     if (!refText || !genText) return res.status(400).json({ error: "refText and genText required" });
 
-    // Use Node's built-in http.request to completely bypass Undici's 300s headersTimeout
     import("node:http").then(async (http) => {
       const boundary = "----WebKitFormBoundary" + Math.random().toString(36).substring(2);
       const url = new URL(`${AI_SERVICE_URL}/generate`);
@@ -50,7 +48,7 @@ app.post("/api/tts", upload.single("refAudio"), async (req, res) => {
         headers: {
           "Content-Type": `multipart/form-data; boundary=${boundary}`,
         },
-        timeout: 30 * 60 * 1000, // 30 minutes
+        timeout: 30 * 60 * 1000,
       };
 
       const aiReq = http.request(reqOptions, (aiRes) => {
@@ -63,7 +61,6 @@ app.post("/api/tts", upload.single("refAudio"), async (req, res) => {
               const parsed = JSON.parse(responseData);
               detail = parsed.detail || parsed.error || responseData;
             } catch {
-              // Keep the raw AI response when it is not JSON.
             }
             return res.status(aiRes.statusCode === 400 ? 400 : 502).json({
               error: detail,
@@ -72,7 +69,6 @@ app.post("/api/tts", upload.single("refAudio"), async (req, res) => {
 
           try {
             const { filename } = JSON.parse(responseData);
-            // Copy file locally
             const fileUrl = new URL(`${AI_SERVICE_URL}/audio/${filename}`);
             http.get(fileUrl, (fileRes) => {
               const fileChunks = [];
@@ -95,7 +91,6 @@ app.post("/api/tts", upload.single("refAudio"), async (req, res) => {
 
       aiReq.setTimeout(30 * 60 * 1000);
 
-      // Build multipart body manually
       const CRLF = "\r\n";
       let bodyPrefix = "";
       bodyPrefix += `--${boundary}${CRLF}`;

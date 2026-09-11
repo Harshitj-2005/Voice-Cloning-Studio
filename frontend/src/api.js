@@ -1,4 +1,3 @@
-// Talks to the Express backend (proxied to /api in dev via vite.config.js)
 export async function generateSpeech({ refAudio, refText, genText }) {
   const form = new FormData();
   form.append("refAudio", refAudio);
@@ -15,5 +14,5 @@ export async function generateSpeech({ refAudio, refText, genText }) {
     throw new Error(err.error || err.detail || "Generation failed");
   }
 
-  return res.json(); // { audioUrl, message }
+  return res.json();
 }
